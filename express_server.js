@@ -1,12 +1,11 @@
 function generateRandomString(string) {
   let randomString = '';
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-for (let i =  0; i < string; i++) {
+  for (let i =  0; i < string; i++) {
   randomString += characters.charAt(Math.floor(Math.random() * characters.length));
 }
   return randomString;
 };
-generateRandomString(6);
 
 const express = require("express");
 const app = express();
@@ -42,13 +41,21 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok"); 
+  let randomID = generateRandomString(6);
+  let longUrl = req.body.longURL;
+  urlDatabase[randomID] = longUrl;
+  // res.send("Ok"); 
+  res.redirect(`/urls/${randomID}`);
+});
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
 
 
 
