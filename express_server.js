@@ -8,6 +8,7 @@ function generateRandomString(string) {
 };
 
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
@@ -17,17 +18,24 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase,
+    userName: req.cookies.userName
+  };
   res.render("urls_index", templateVars);
 });
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+app.get("/urls/new", (req, res) => {  
+  const templateVars = { 
+    userName: req.cookies.userName
+  };
+  res.render("urls_new", templateVars);
 });
 app.get("/urls/:id", (req, res) => {
   console.log(req.params.id);
@@ -63,7 +71,13 @@ app.post("/login", (req, res) => {
   // console.log(req.body);
   let userName = req.body.username;
   // console.log(userName);
-  res.cookie(userName);
+  res.cookie("userName", userName);
+  res.redirect("/urls");
+
+})
+app.post("/logout", (req, res) => {
+  res.clearCookie("userName");
+  res.redirect("/urls")
 })
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
