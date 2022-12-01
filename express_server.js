@@ -30,7 +30,14 @@ const userLookup = function (email) {
   return null;
 }
 
-
+const getUserFromReqs = function(req) {
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  if(!user) {
+    return null;
+  }
+  return user;
+}
 
 const express = require("express");
 const cookieParser = require('cookie-parser');
@@ -59,15 +66,17 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
-  let userCookie = req.cookies.user_id;
-  if (!userCookie) {
+  const user = getUserFromReqs(req);
+  // let userCookie = req.cookies.user_id;
+  if (!user) {
     res.redirect("/login")
-  } else {
+    return
+  } 
   const templateVars = {
-    user: users[req.cookies.user_id]
+    user: user
   };
   res.render("urls_new", templateVars);
-}
+
 });
 app.get("/urls/:id", (req, res) => {
   console.log(req.params.id);
@@ -84,6 +93,11 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 app.post("/urls", (req, res) => {
+  const user = getUserFromReqs(req);
+  if (!user) {
+    res.send("Please login!")
+    return
+  } 
   let randomID = generateRandomString(6);
   let longUrl = req.body.longURL;
   urlDatabase[randomID] = longUrl;
@@ -104,12 +118,6 @@ app.post("/urls/:id/", (req, res) => {
 })
 app.post("/login", (req, res) => {
   // console.log(req.body);
-
-  // 1. check for email in database
-  // if email not found status code 403
-  // if email found check for password
-  // if password matches set cookie res.cookie
-  // else return status 403
   const user = userLookup(req.body.email);
 
   if (!user) {
@@ -128,15 +136,17 @@ app.post("/logout", (req, res) => {
   res.redirect("/login")
 })
 app.get("/register", (req, res) => {
-  let userCookie = req.cookies.user_id;
-  if (userCookie) {
+  const user = getUserFromReqs(req);
+
+  // let userCookie = req.cookies.user_id;
+  if (user) {
     res.redirect("/urls")
-  } else {
+    return
+  } 
   const templateVars = {
-    user: users[req.cookies.user_id]
+    user: user
   };
   res.render("urls_register", templateVars);
-}
 });
 app.post("/register", (req, res) => {
   let user = userLookup(req.body.email);
