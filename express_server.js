@@ -59,10 +59,15 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
+  let userCookie = req.cookies.user_id;
+  if (!userCookie) {
+    res.redirect("/login")
+  } else {
   const templateVars = {
     user: users[req.cookies.user_id]
   };
   res.render("urls_new", templateVars);
+}
 });
 app.get("/urls/:id", (req, res) => {
   console.log(req.params.id);
@@ -123,15 +128,20 @@ app.post("/logout", (req, res) => {
   res.redirect("/login")
 })
 app.get("/register", (req, res) => {
+  let userCookie = req.cookies.user_id;
+  if (userCookie) {
+    res.redirect("/urls")
+  } else {
   const templateVars = {
     user: users[req.cookies.user_id]
   };
   res.render("urls_register", templateVars);
+}
 });
 app.post("/register", (req, res) => {
   let user = userLookup(req.body.email);
   console.log(user);
-  
+
   if (req.body.email === "" || req.body.password === "") {
     // console.log("Email or Password empty")
     return res.send("Email or Password empty", 400);
@@ -140,7 +150,7 @@ app.post("/register", (req, res) => {
     // console.log("Email already exists");
     return res.send("Email already exists", 400);
   }
-  
+
   const randomUserId = generateRandomString(6);
 
   let newUser = {
@@ -156,10 +166,15 @@ app.post("/register", (req, res) => {
 
 })
 app.get("/login", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies.user_id]
-  };
-  res.render("urls_login", templateVars);
+  let userCookie = req.cookies.user_id;
+  if (userCookie) {
+    res.redirect("/urls")
+  } else {
+    const templateVars = {
+      user: users[req.cookies.user_id]
+    };
+    res.render("urls_login", templateVars);
+  }
 });
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
