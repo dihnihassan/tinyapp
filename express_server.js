@@ -113,6 +113,10 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 app.post("/urls/:id/delete", (req, res) => {
+  if (!urlDatabase[req.params.id]) {
+    res.send("The URL doesn't exist")
+    return;
+  }
   delete urlDatabase[req.params.id];
   res.redirect("/urls")
 })
