@@ -1,5 +1,5 @@
 module.exports = {
-  userLookup: function (email, database) {
+  userLookup: function(email, database) {
     for (const info in database) {
       // console.log(info);
       if (email === database[info].email) {
@@ -8,7 +8,7 @@ module.exports = {
     }
     return null;
   },
-}
+};
 
 
 
