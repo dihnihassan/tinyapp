@@ -54,6 +54,7 @@ const urlsForUser = function (id) {
 
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 const { request } = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -149,7 +150,7 @@ app.post("/urls", (req, res) => {
   let userID = req.cookies.user_id;
   urlDatabase[randomID] = { longURL, userID };
   // console.log(urlDatabase[randomID]);
-  console.log({ longURL, userID });
+  // console.log({ longURL, userID });
   // res.send("Ok"); 
   res.redirect(`/urls/${randomID}`);
 });
@@ -183,16 +184,15 @@ app.post("/urls/:id/", (req, res) => {
 app.post("/login", (req, res) => {
   // console.log(req.body);
   const user = userLookup(req.body.email);
-
   if (!user) {
-    return res.send(403);
-  } else if
-    (req.body.password === user.password) {
+    return res.sendStatus(403);
+  } else if (bcrypt.compareSync(req.body.password, user.password)) {
+    // console.log(users);
     res.cookie("user_id", user.id)
     res.redirect("/urls");
   }
   else {
-    return res.send(403);
+    return res.sendStatus(403);
   }
 });
 app.post("/logout", (req, res) => {
@@ -230,10 +230,8 @@ app.post("/register", (req, res) => {
   let newUser = {
     id: randomUserId,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, 10)
   }
-
-
   // console.log(randomUserId);
   users[randomUserId] = newUser;
   // console.log(users);
