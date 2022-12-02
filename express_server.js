@@ -56,7 +56,7 @@ const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const { request } = require("express");
-const userLookup = require('./helpers');
+const { userLookup } = require('./helpers');
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
@@ -187,13 +187,13 @@ app.post("/urls/:id/", (req, res) => {
 })
 app.post("/login", (req, res) => {
   // console.log(req.body);
-  const user = userLookup(req.body.email);
-  console.log(user);
-  console.log(bcrypt.compareSync(req.body.password, user.password))
+  const user = userLookup(req.body.email, users);
+  console.log("THIS IS USER", user);
+
   if (!user) {
     return res.sendStatus(403);
   } else if (bcrypt.compareSync(req.body.password, user.password)) {
-    // console.log(users);
+    //  console.log(bcrypt.compareSync(req.body.password, user.password))
     req.session.user_id = user.id
     res.redirect("/urls");
   }
