@@ -20,15 +20,15 @@ const users = {
   },
 };
 
-const userLookup = function (email) {
-  for (const info in users) {
-    // console.log(info);
-    if (email === users[info].email) {
-      return users[info];
-    }
-  }
-  return null;
-}
+// const userLookup = function (email, database) {
+//   for (const info in users) {
+//     // console.log(info);
+//     if (email === users[info].email) {
+//       return users[info];
+//     }
+//   }
+//   return null;
+// }
 
 const getUserFromReqs = function (req) {
   const userId = req.session.user_id;
@@ -56,6 +56,7 @@ const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const { request } = require("express");
+const userLookup = require('./helpers');
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
