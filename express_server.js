@@ -1,5 +1,5 @@
 function generateRandomString(string) {
-  let randomString = '';
+  let randomString = ''
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   for (let i = 0; i < string; i++) {
     randomString += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -20,37 +20,25 @@ const users = {
   },
 };
 
-// const userLookup = function (email, database) {
-//   for (const info in users) {
-//     // console.log(info);
-//     if (email === users[info].email) {
-//       return users[info];
-//     }
-//   }
-//   return null;
-// }
-
-const getUserFromReqs = function (req) {
+const getUserFromReqs = function(req) {
   const userId = req.session.user_id;
   const user = users[userId];
   if (!user) {
     return null;
   }
   return user;
-}
+};
 
-const urlsForUser = function (id) {
+const urlsForUser = function(id) {
   let urlResults = {};
   for (const urls in urlDatabase) {
-    // console.log("This is for user URLS", urlDatabase[urls]);
     if (id === urlDatabase[urls].userID) {
       urlResults[urls] = urlDatabase[urls];
     }
 
-  } 
-  // console.log(urlResults);
+  }
   return urlResults;
-}
+};
 
 const express = require("express");
 const cookieSession = require('cookie-session');
@@ -58,13 +46,9 @@ const bcrypt = require("bcryptjs");
 const { request } = require("express");
 const { userLookup } = require('./helpers');
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 app.set("view engine", "ejs");
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 const urlDatabase = {
   b6UTxQ: {
@@ -78,7 +62,7 @@ const urlDatabase = {
 };
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieSession({ 
+app.use(cookieSession({
   name: 'session',
   keys: ['key1, key2']
 }));
@@ -89,8 +73,8 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const user = getUserFromReqs(req);
   if (!user) {
-    res.send("Login or Register to view URLs")
-    return
+    res.send("Login or Register to view URLs");
+    return;
   }
   const userUrls = urlsForUser(req.session.user_id);
   const templateVars = {
@@ -101,10 +85,9 @@ app.get("/urls", (req, res) => {
 });
 app.get("/urls/new", (req, res) => {
   const user = getUserFromReqs(req);
-  // let userCookie = req.cookies.user_id;
   if (!user) {
-    res.redirect("/login")
-    return
+    res.redirect("/login");
+    return;
   }
   const templateVars = {
     user: user
@@ -113,22 +96,15 @@ app.get("/urls/new", (req, res) => {
 
 });
 app.get("/urls/:id", (req, res) => {
-  // console.log(req.params.id);
   const user = getUserFromReqs(req);
   if (!user) {
     res.send("Please login to view page");
-    // res.redirect("/login")
-    return
+    return;
   }
-// console.log(urlDatabase[req.params.id]);
-// console.log(req.cookies.user_id); 
 
-if (urlDatabase[req.params.id].userID !== req.session.user_id) {
+  if (urlDatabase[req.params.id].userID !== req.session.user_id) {
     return res.send("This user does not own this URL");
   }
-  // console.log(urlDatabase[req.params.id]);
-  // console.log({user});
-  // console.log(req.params.id);
   const longURL = urlDatabase[req.params.id].longURL;
   const templateVars = {
     id: req.params.id,
@@ -146,16 +122,13 @@ app.get("/hello", (req, res) => {
 app.post("/urls", (req, res) => {
   const user = getUserFromReqs(req);
   if (!user) {
-    res.send("Please login!")
-    return
+    res.send("Please login!");
+    return;
   }
   let randomID = generateRandomString(6);
   let longURL = req.body.longURL;
   let userID = req.session.user_id;
   urlDatabase[randomID] = { longURL, userID };
-  // console.log(urlDatabase[randomID]);
-  // console.log({ longURL, userID });
-  // res.send("Ok"); 
   res.redirect(`/urls/${randomID}`);
 });
 app.get("/u/:id", (req, res) => {
@@ -169,7 +142,7 @@ app.get("/u/:id", (req, res) => {
 });
 app.post("/urls/:id/delete", (req, res) => {
   if (!urlDatabase[req.params.id]) {
-    res.status(400).send("The URL doesn't exist")
+    res.status(400).send("The URL doesn't exist");
     return;
   }
   if (!req.session.user_id) {
@@ -179,40 +152,35 @@ app.post("/urls/:id/delete", (req, res) => {
     return res.status(403).send("This user does not own this URL");
   }
   delete urlDatabase[req.params.id];
-  res.redirect("/urls")
-})
-// implement EDIT code
+  res.redirect("/urls");
+});
 app.post("/urls/:id/", (req, res) => {
   urlDatabase[req.params.id].longURL = req.body.newURL;
-  res.redirect("/urls")
-})
+  res.redirect("/urls");
+});
 app.post("/login", (req, res) => {
-  // console.log(req.body);
   const user = userLookup(req.body.email, users);
   console.log("THIS IS USER", user);
 
   if (!user) {
     return res.sendStatus(403);
   } else if (bcrypt.compareSync(req.body.password, user.password)) {
-    //  console.log(bcrypt.compareSync(req.body.password, user.password))
-    req.session.user_id = user.id
+    req.session.user_id = user.id;
     res.redirect("/urls");
-  }
-  else {
+  } else {
     return res.sendStatus(403);
   }
 });
 app.post("/logout", (req, res) => {
   res.clearCookie("session");
-  res.redirect("/login")
-})
+  res.redirect("/login");
+});
 app.get("/register", (req, res) => {
   const user = getUserFromReqs(req);
 
-  // let userCookie = req.cookies.user_id;
   if (user) {
-    res.redirect("/urls")
-    return
+    res.redirect("/urls");
+    return;
   }
   const templateVars = {
     user: user
@@ -224,11 +192,9 @@ app.post("/register", (req, res) => {
   console.log(user);
 
   if (req.body.email === "" || req.body.password === "") {
-    // console.log("Email or Password empty")
     return res.send("Email or Password empty", 400);
   }
   if (user) {
-    // console.log("Email already exists");
     return res.send("Email already exists", 400);
   }
 
@@ -239,18 +205,16 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10)
   }
-  // console.log(randomUserId);
-  console.log("THIS IS FOR NEW USER", newUser);
+
   users[randomUserId] = newUser;
-  console.log("THIS IS FOR USER", users);
   req.session.user_id = randomUserId;
   res.redirect("/urls");
 
-})
+});
 app.get("/login", (req, res) => {
   let userCookie = req.session.user_id;
   if (userCookie) {
-    res.redirect("/urls")
+    res.redirect("/urls");
   } else {
     const templateVars = {
       user: users[req.session.user_id]
