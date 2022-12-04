@@ -1,3 +1,21 @@
+const express = require("express");
+const cookieSession = require('cookie-session');
+const bcrypt = require("bcryptjs");
+const { request } = require("express");
+const { userLookup } = require('./helpers');
+const app = express();
+const PORT = 8080;
+app.set("view engine", "ejs");
+
+
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1, key2']
+}));
+
+
+
 function generateRandomString(string) {
   let randomString = ''
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -40,14 +58,6 @@ const urlsForUser = function(id) {
   return urlResults;
 };
 
-const express = require("express");
-const cookieSession = require('cookie-session');
-const bcrypt = require("bcryptjs");
-const { request } = require("express");
-const { userLookup } = require('./helpers');
-const app = express();
-const PORT = 8080;
-app.set("view engine", "ejs");
 
 
 const urlDatabase = {
@@ -61,15 +71,12 @@ const urlDatabase = {
   },
 };
 
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieSession({
-  name: 'session',
-  keys: ['key1, key2']
-}));
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
+// 
 app.get("/urls", (req, res) => {
   const user = getUserFromReqs(req);
   if (!user) {
@@ -83,6 +90,8 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
+
+// 
 app.get("/urls/new", (req, res) => {
   const user = getUserFromReqs(req);
   if (!user) {
@@ -93,8 +102,9 @@ app.get("/urls/new", (req, res) => {
     user: user
   };
   res.render("urls_new", templateVars);
-
 });
+
+// 
 app.get("/urls/:id", (req, res) => {
   const user = getUserFromReqs(req);
   if (!user) {
@@ -113,12 +123,18 @@ app.get("/urls/:id", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+
+// 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+// 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
+// 
 app.post("/urls", (req, res) => {
   const user = getUserFromReqs(req);
   if (!user) {
@@ -131,6 +147,8 @@ app.post("/urls", (req, res) => {
   urlDatabase[randomID] = { longURL, userID };
   res.redirect(`/urls/${randomID}`);
 });
+
+// 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   if (!longURL) {
@@ -140,6 +158,8 @@ app.get("/u/:id", (req, res) => {
  
   res.redirect(longURL);
 });
+
+// 
 app.post("/urls/:id/delete", (req, res) => {
   if (!urlDatabase[req.params.id]) {
     res.status(400).send("The URL doesn't exist");
@@ -154,10 +174,14 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
+
+// 
 app.post("/urls/:id/", (req, res) => {
   urlDatabase[req.params.id].longURL = req.body.newURL;
   res.redirect("/urls");
 });
+
+// 
 app.post("/login", (req, res) => {
   const user = userLookup(req.body.email, users);
   console.log("THIS IS USER", user);
@@ -171,10 +195,14 @@ app.post("/login", (req, res) => {
     return res.sendStatus(403);
   }
 });
+
+// 
 app.post("/logout", (req, res) => {
   res.clearCookie("session");
   res.redirect("/login");
 });
+
+// 
 app.get("/register", (req, res) => {
   const user = getUserFromReqs(req);
 
@@ -187,6 +215,8 @@ app.get("/register", (req, res) => {
   };
   res.render("urls_register", templateVars);
 });
+
+// 
 app.post("/register", (req, res) => {
   let user = userLookup(req.body.email);
   console.log(user);
@@ -211,6 +241,8 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 
 });
+
+// 
 app.get("/login", (req, res) => {
   let userCookie = req.session.user_id;
   if (userCookie) {
@@ -222,6 +254,8 @@ app.get("/login", (req, res) => {
     res.render("urls_login", templateVars);
   }
 });
+
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
