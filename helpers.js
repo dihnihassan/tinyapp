@@ -22,10 +22,9 @@ const urlDatabase = {
   },
 };
 
-
+// Function to find user in User database by its email
 const userLookup = function(email) {
   for (const info in users) {
-    // console.log(info);
     if (email === users[info].email) {
       return users[info];
     }
@@ -33,6 +32,7 @@ const userLookup = function(email) {
   return null;
 };
 
+// Function to Generate Random String for new shortURL and UserIds
 const generateRandomString = function(str) {
   let randomString = ''
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -41,6 +41,7 @@ const generateRandomString = function(str) {
   }
   return randomString;
 };
+
 
 const getUserFromReqs = function(reqObj) {
   const userId = reqObj.session.user_id;
@@ -51,6 +52,7 @@ const getUserFromReqs = function(reqObj) {
   return user;
 };
 
+// Function returns URLs where userID equals id of logged in User
 const urlsForUser = function(id) {
   let urlResults = {};
   for (const urls in urlDatabase) {
